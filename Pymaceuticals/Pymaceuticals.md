@@ -1,9 +1,11 @@
 
 ## Aanlysis
 
-1. Only one Drug, Capomulin, was observed to have positive effect on reduce the tumor size, and better survival rate among four.
+1. Only one drug, Capomulin, was observed to have positive effect on reduce the tumor size, and better survival rate among four. Others does not show significant difference from the placebo.
 2. Metastatic Spread has a significant large standard error. More analysis is needed to proof the hypothesis for any drug is better on this aspect than others.
 3. Standard error for all parameters grow with time
+
+## Imports and Constants
 
 
 ```python
@@ -12,7 +14,6 @@ from collections import OrderedDict
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 # Predefined Marker, LineStyle and Colors
 COLORS = ['red', 'blue', 'green', 'black']
@@ -306,7 +307,7 @@ df_tumor_std.head()
 
 
 
-### Plot using pylot
+### Plot with pylot
 
 The issue with pyplot is that error bar cannot return a legend type so I have to call plot for legend then errobar again.
 
@@ -342,10 +343,10 @@ plt.show()
 ```
 
 
-![png](output_11_0.png)
+![png](output_12_0.png)
 
 
-### Plot using DataFrame.plot
+### Plot with DataFrame.plot
 The limit of this approach is that marker argument does not take a list, even though color take a list of colors, so only one marker can be used. If printed on a B/W printer, this could be a problem.
 
 
@@ -368,12 +369,12 @@ plt.show()
 ```
 
 
-![png](output_13_0.png)
+![png](output_14_0.png)
 
 
 ## Metastatic Response to Treatment
 
-### Get Mean Values
+### Compute Mean Values
 
 
 
@@ -463,7 +464,7 @@ df_metastatic_mean.head()
 
 
 
-### Get Standard Deviations
+### Compute Standard Deviations
 
 
 ```python
@@ -553,7 +554,7 @@ df_metastatic_std.head()
 
 
 
-### Plot using pyplot.plot
+### Plot with pyplot
 
 
 ```python
@@ -587,10 +588,10 @@ plt.show()
 ```
 
 
-![png](output_20_0.png)
+![png](output_21_0.png)
 
 
-### Plot Using DataFrame.plot
+### Plot with DataFrame.plot
 Looks like when plotting with DataFrame the error bar size is different from the size using Pyplot. This is kind of strange. Not sure it is a bug or there is some control factor not been set correctly.
 
 
@@ -613,12 +614,12 @@ plt.show()
 ```
 
 
-![png](output_22_0.png)
+![png](output_23_0.png)
 
 
 ## Survival Rates
 
-### Numbers of Survival Mice
+### Computer Numbers of Survived Mice
 
 
 ```python
@@ -793,7 +794,7 @@ df_mouse_perc.head()
 
 
 
-### Plot with Pyplot.plot
+### Plot with Pyplot
 
 
 ```python
@@ -822,7 +823,7 @@ plt.show()
 ```
 
 
-![png](output_29_0.png)
+![png](output_30_0.png)
 
 
 ### Plot with DataFrame.plot
@@ -848,7 +849,7 @@ plt.show()
 ```
 
 
-![png](output_31_0.png)
+![png](output_32_0.png)
 
 
 ## Summary Bar Graph
@@ -876,8 +877,8 @@ tumor_change_perc
 
 
 
-### Plot with Pyplot.bar
-I've tried using plot method of Series but could not get enough control over on the bar color baed on positive/negative sign of the percentage, so stick to use the base Pyplot method.
+### Plot with Pyplot
+I've tried using plot method of Series but could not get enough control over on the bar color based on positive/negative sign of the percentage, so stick to use the base Pyplot method.
 
 
 ```python
@@ -913,5 +914,5 @@ plt.show()
 ```
 
 
-![png](output_36_0.png)
+![png](output_37_0.png)
 
