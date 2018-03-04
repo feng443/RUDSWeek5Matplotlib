@@ -9,3 +9,4 @@ Both options are done.
 ## Option 2: Pymaceuticals Inc
 
 * [Pymaceuticals/Pymaceuticals.ipynb](Pymaceuticals/Pymaceuticals.ipynb])
+* [Pymaceuticals/Pymaceuticals.md](Pymaceuticals/Pymaceuticals.md])
