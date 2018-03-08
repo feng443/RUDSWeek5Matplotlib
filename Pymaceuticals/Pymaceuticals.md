@@ -280,7 +280,6 @@ df_tumor_mean = df_combo.pivot_table(
     index='Timepoint',
     columns='Drug'
 )[DRUGS]
-
 df_tumor_mean.head()
 ```
 
@@ -360,18 +359,18 @@ df_tumor_mean.head()
 
 
 
-### Compute Standard Deviations
+### Compute Standard Error
 
 
 ```python
-df_tumor_std = df_combo.pivot_table(
+df_tumor_sem = df_combo.pivot_table(
     values='Tumor Volume (mm3)',
     index='Timepoint',
     columns='Drug',
-    aggfunc='std'
+    aggfunc='sem'
 )[DRUGS]
 
-df_tumor_std.head()
+df_tumor_sem.head()
 ```
 
 
@@ -418,31 +417,31 @@ df_tumor_std.head()
     </tr>
     <tr>
       <th>5</th>
-      <td>2.242964</td>
-      <td>1.175512</td>
-      <td>1.270025</td>
-      <td>1.068422</td>
+      <td>0.448593</td>
+      <td>0.235102</td>
+      <td>0.264819</td>
+      <td>0.218091</td>
     </tr>
     <tr>
       <th>10</th>
-      <td>3.513422</td>
-      <td>1.293872</td>
-      <td>1.676454</td>
-      <td>1.969702</td>
+      <td>0.702684</td>
+      <td>0.282346</td>
+      <td>0.357421</td>
+      <td>0.402064</td>
     </tr>
     <tr>
       <th>15</th>
-      <td>4.108369</td>
-      <td>1.639210</td>
-      <td>2.529329</td>
-      <td>2.747955</td>
+      <td>0.838617</td>
+      <td>0.357705</td>
+      <td>0.580268</td>
+      <td>0.614461</td>
     </tr>
     <tr>
       <th>20</th>
-      <td>4.362915</td>
-      <td>2.129674</td>
-      <td>3.166670</td>
-      <td>3.659772</td>
+      <td>0.909731</td>
+      <td>0.476210</td>
+      <td>0.726484</td>
+      <td>0.839609</td>
     </tr>
   </tbody>
 </table>
@@ -454,14 +453,15 @@ df_tumor_std.head()
 
 
 ```python
-fig, ax = plt.subplots(1,1, figsize=(6, 4))
+fig, ax = plt.subplots(figsize=(6, 4))
 
 for drug in DRUGS:
     ax.errorbar(
-       x=df_tumor_std.index,
+       x=df_tumor_sem.index,
        y=df_tumor_mean[drug],
-       yerr=df_tumor_std[drug],
-       capsize=50,
+       yerr=df_tumor_sem[drug] * 1.96,
+       capsize=5,
+       capthick=1,
        **DRUGS_CONFIG[drug],
        **SHARED_CONFIG
        )
@@ -487,8 +487,9 @@ The limit of this approach is that marker argument does not take a list, even th
 
 ```python
 df_tumor_mean.plot(
-    yerr=df_tumor_std[drug],
-    capsize=100,
+    yerr=df_tumor_sem[drug] * 1.96,
+    capsize=4,
+    capthick=1,
     marker='o',
     color=COLORS,
     **SHARED_CONFIG,
@@ -513,20 +514,25 @@ plt.show()
 ### Plot with Seaborn pointplot
 Searborn's point_point() method take detail level data direclty and draw error bar automatically. Also it is highly configurable. However, I cannot figure out from the document and Googling, the way to set alpha for the line. There is an un-answered stack overflow post: https://stackoverflow.com/questions/33486613/seaborn-pointplot-aesthetics?rq=1
 
+OK, found a work around to set line width but still no vaid on alpha: https://github.com/mwaskom/seaborn/issues/1058
+
 
 ```python
 fig, ax = plt.subplots(1,1, figsize=(6, 4))
 
-sns.pointplot(
-    x="Timepoint", 
-    y="Tumor Volume (mm3)", 
-    hue="Drug", 
-    data=df_combo[df_combo['Drug'].isin(DRUGS)],
-    palette={drug: DRUGS_CONFIG[drug]['color'] for drug in DRUGS},
-    markers=[DRUGS_CONFIG[drug]['marker'] for drug in DRUGS],
-    linestyles=['--' for _ in DRUGS],
-    ax=ax,
-    capsize=0.1,
+ 
+with plt.rc_context({'lines.linewidth': 1}):
+    sns.pointplot(
+        x="Timepoint", 
+        y="Tumor Volume (mm3)", 
+        hue="Drug", 
+        data=df_combo[df_combo['Drug'].isin(DRUGS)],
+        palette={drug: DRUGS_CONFIG[drug]['color'] for drug in DRUGS},
+        markers=[DRUGS_CONFIG[drug]['marker'] for drug in DRUGS],
+        linestyles=['--' for _ in DRUGS],
+        ax=ax,
+        capsize=0.1,
+        alpha=0.5,
    
 );
 ax.legend(title='')
@@ -636,14 +642,14 @@ df_metastatic_mean.head()
 
 
 ```python
-df_metastatic_std = df_combo.pivot_table(
+df_metastatic_sem = df_combo.pivot_table(
     values='Metastatic Sites',
     index='Timepoint',
     columns='Drug',
-    aggfunc='std'
+    aggfunc='sem'
 )[DRUGS]
 
-df_metastatic_std.head()
+df_metastatic_sem.head()
 ```
 
 
@@ -690,31 +696,31 @@ df_metastatic_std.head()
     </tr>
     <tr>
       <th>5</th>
-      <td>0.374166</td>
-      <td>0.458258</td>
-      <td>0.470472</td>
-      <td>0.494535</td>
+      <td>0.074833</td>
+      <td>0.091652</td>
+      <td>0.098100</td>
+      <td>0.100947</td>
     </tr>
     <tr>
       <th>10</th>
-      <td>0.627163</td>
-      <td>0.730297</td>
-      <td>0.666125</td>
-      <td>0.564660</td>
+      <td>0.125433</td>
+      <td>0.159364</td>
+      <td>0.142018</td>
+      <td>0.115261</td>
     </tr>
     <tr>
       <th>15</th>
-      <td>0.646899</td>
-      <td>0.889087</td>
-      <td>0.834210</td>
-      <td>0.850696</td>
+      <td>0.132048</td>
+      <td>0.194015</td>
+      <td>0.191381</td>
+      <td>0.190221</td>
     </tr>
     <tr>
       <th>20</th>
-      <td>0.775107</td>
-      <td>1.050063</td>
-      <td>1.031662</td>
-      <td>1.020263</td>
+      <td>0.161621</td>
+      <td>0.234801</td>
+      <td>0.236680</td>
+      <td>0.234064</td>
     </tr>
   </tbody>
 </table>
@@ -726,26 +732,15 @@ df_metastatic_std.head()
 
 
 ```python
-fig, ax = plt.subplots(1,1, figsize=(6, 4))
-
-"""
-plt.legend(
-    handles=[
-        plt.plot(
-            df_metastatic_mean[drug],
-            **DRUGS_CONFIG[drug],
-            **SHARED_CONFIG
-        )[0] for drug in DRUGS
-    ]
-)
-"""
+fig, ax = plt.subplots(figsize=(6, 4))
 
 for drug in DRUGS:
     plt.errorbar(
-       x=df_metastatic_std.index,
+       x=df_metastatic_sem.index,
        y=df_metastatic_mean[drug],
-       yerr=df_metastatic_std[drug],
+       yerr=df_metastatic_sem[drug] * 1.96,
        capsize=4,
+       capthick=1,
        **DRUGS_CONFIG[drug],
        **SHARED_CONFIG
        )
@@ -770,11 +765,12 @@ Looks like when plotting with DataFrame the error bar size is different from the
 
 
 ```python
-fig, ax = plt.subplots(1,1, figsize=(6, 4))
+fig, ax = plt.subplots(figsize=(6, 4))
 
 df_metastatic_mean.plot(
-    yerr=df_metastatic_std[drug],
-    capsize=4,
+    yerr=df_metastatic_sem[drug],
+    capsize=5,
+    capthick=1,
     marker='o',
     color=COLORS,
     **SHARED_CONFIG,
@@ -799,20 +795,21 @@ plt.show()
 
 
 ```python
-fig, ax = plt.subplots(1,1, figsize=(6, 4))
+fig, ax = plt.subplots(figsize=(6, 4))
+ 
+with plt.rc_context({'lines.linewidth': 1}):
+    sns.pointplot(
+        x="Timepoint", 
+        y="Metastatic Sites", 
+        hue="Drug", 
+        data=df_combo[df_combo['Drug'].isin(DRUGS)],
+        palette={drug: DRUGS_CONFIG[drug]['color'] for drug in DRUGS},
+        markers=[DRUGS_CONFIG[drug]['marker'] for drug in DRUGS],
+        linestyles=['--' for _ in DRUGS],
+        ax=ax,
+        capsize=0.1, 
+    );
 
-sns.pointplot(
-    x="Timepoint", 
-    y="Metastatic Sites", 
-    hue="Drug", 
-    data=df_combo[df_combo['Drug'].isin(DRUGS)],
-    palette={drug: DRUGS_CONFIG[drug]['color'] for drug in DRUGS},
-    markers=[DRUGS_CONFIG[drug]['marker'] for drug in DRUGS],
-    linestyles=['--' for _ in DRUGS],
-    ax=ax,
-    capsize=0.1,
-   
-);
 ax.legend(title='')
 ax.grid(True, linestyle='--')
 ax.set_title('Metastatic Spreading During Treatment')
@@ -1005,7 +1002,7 @@ df_mouse_perc.head()
 
 
 ```python
-fig, ax = plt.subplots(1,1, figsize=(6, 4))
+fig, ax = plt.subplots(figsize=(6, 4))
 
 handles = [ plt.plot(
             df_mouse_perc[drug],
@@ -1038,7 +1035,7 @@ plt.show()
 
 
 ```python
-fig, ax = plt.subplots(1,1, figsize=(6, 4))
+fig, ax = plt.subplots(figsize=(6, 4))
 
 df_mouse_perc.reset_index().plot.line(
     x='Timepoint',
@@ -1093,7 +1090,7 @@ I've tried using plot method of Series but could not get enough control over on 
 
 
 ```python
-fig, ax = plt.subplots(1,1, figsize=(6, 4))
+fig, ax = plt.subplots(figsize=(6, 4))
 
 ax.bar(
     DRUGS,

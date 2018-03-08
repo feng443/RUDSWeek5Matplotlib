@@ -280,7 +280,7 @@ __Note__: When plotting the size is multiplied by 10 to show more apparent diffe
 
 
 ```python
-fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+fig, ax = plt.subplots(figsize=(10, 8))
 
 # Multiply side by 10 to see differences easier
 handles = [
@@ -308,7 +308,7 @@ ax.text(37, 40, 'Note:\nSize of dot represent total driver count per city.',
 
 plt.title('Pyber Ride Sharing Data (2016)')
 plt.xlabel('Total Number of Rides (Per City)')
-plt.ylabel('Average Fares ($)')
+plt.ylabel('Average Fare ($)')
 
 plt.show()
 ```
@@ -434,7 +434,8 @@ PIE_STYLE = {
     'wedgeprops': {'linewidth': 1, 'edgecolor': 'grey'}
 }
 
-plt.figure(figsize=(15, 5))
+fig, ax = plt.subplots(3, 1, figsize=(15, 5))
+plt.suptitle("Total fare, ride and drivers by city type")
 
 plt.subplot(131)
 plt.title('% of Total Fares by City Type')
