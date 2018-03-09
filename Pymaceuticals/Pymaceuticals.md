@@ -453,27 +453,30 @@ df_tumor_sem.head()
 
 
 ```python
-fig, ax = plt.subplots(figsize=(6, 4))
+fig, ax = plt.subplots(figsize=(7.5, 6))
 
-for drug in DRUGS:
-    ax.errorbar(
-       x=df_tumor_sem.index,
-       y=df_tumor_mean[drug],
-       yerr=df_tumor_sem[drug] * Z,
-       capsize=5,
-       capthick=1,
-       **DRUGS_CONFIG[drug],
-       **SHARED_CONFIG,
-       )
+def plot_vol(ax):
+    for drug in DRUGS:
+        ax.errorbar(
+           x=df_tumor_sem.index,
+           y=df_tumor_mean[drug],
+           yerr=df_tumor_sem[drug] * Z,
+           capsize=5,
+           capthick=1,
+           **DRUGS_CONFIG[drug],
+           **SHARED_CONFIG,
+           )
 
-ax.legend(loc='best')
+    ax.legend(loc='best')
 
-plt.xlim((0,50))
-plt.ylim((20, 80))
-plt.grid(True, linestyle='--')
-plt.xlabel('Time(Days)')
-plt.ylabel('Tumor Volume (mm3)')
-plt.title('Tumer Response to Treatement')
+    plt.xlim((0,50))
+    plt.ylim((20, 80))
+    plt.grid(True, linestyle='--')
+    plt.xlabel('Time(Days)')
+    plt.ylabel('Tumor Volume (mm3)')
+    plt.title('Tumer Response to Treatement')
+    
+plot_vol(ax)
 plt.show()
 ```
 
@@ -486,18 +489,19 @@ The limit of this approach is that marker argument does not take a list, even th
 
 
 ```python
+fig, ax = plt.subplots(figsize=(7.5, 6))
+
 df_tumor_mean.plot(
-    yerr=df_tumor_sem[drug] * Z,
+    yerr=df_tumor_sem[DRUGS] * Z,
     capsize=4,
     capthick=1,
     marker='o',
     color=COLORS,
     **SHARED_CONFIG,
-    label='legend',
     xlim=(0, 50),
     ylim=(20, 80),
-    figsize=(6,4),
     title='Tumer Response to Treatement',
+    ax=ax
     )
 
 plt.legend(title='')
@@ -518,7 +522,7 @@ Found a work around to set line width but still no vaid on alpha: https://github
 
 
 ```python
-fig, ax = plt.subplots(1,1, figsize=(6, 4))
+fig, ax = plt.subplots(1,1, figsize=(7.5, 6))
  
 with plt.rc_context({'lines.linewidth': 1}):
     sns.pointplot(
@@ -734,27 +738,30 @@ df_metastatic_sem.head()
 
 
 ```python
-fig, ax = plt.subplots(figsize=(6, 4))
+fig, ax = plt.subplots(figsize=(7.5, 7.5))
 
-for drug in DRUGS:
-    plt.errorbar(
-       x=df_metastatic_sem.index,
-       y=df_metastatic_mean[drug],
-       yerr=df_metastatic_sem[drug] * Z,
-       capsize=4,
-       capthick=1,
-       **DRUGS_CONFIG[drug],
-       **SHARED_CONFIG
-       )
+def plot_met(ax):
+    for drug in DRUGS:
+        ax.errorbar(
+           x=df_metastatic_sem.index,
+           y=df_metastatic_mean[drug],
+           yerr=df_metastatic_sem[drug] * Z,
+           capsize=4,
+           capthick=1,
+           **DRUGS_CONFIG[drug],
+           **SHARED_CONFIG
+           )
 
-ax.legend(loc='best')
+    ax.legend(loc='best')
 
-plt.xlim((0, 50))
-plt.ylim((-0.5, 5))
-plt.grid(True, linestyle='--')
-plt.xlabel('Time(Days)')
-plt.ylabel('Met. Sites')
-plt.title('Metastatic Spreading During Treatment')
+    plt.xlim((0, 50))
+    plt.ylim((-0.5, 5))
+    plt.grid(True, linestyle='--')
+    plt.xlabel('Time(Days)')
+    plt.ylabel('Met. Sites')
+    plt.title('Metastatic Spreading During Treatment')
+
+plot_met(ax)
 plt.show()
 ```
 
@@ -766,10 +773,10 @@ plt.show()
 
 
 ```python
-fig, ax = plt.subplots(figsize=(6, 4))
+fig, ax = plt.subplots(figsize=(7.5, 7.5))
 
 df_metastatic_mean.plot(
-    yerr=df_metastatic_sem[drug] * Z,
+    yerr=df_metastatic_sem[DRUGS] * Z,
     capsize=5,
     capthick=1,
     marker='o',
@@ -796,7 +803,7 @@ plt.show()
 
 
 ```python
-fig, ax = plt.subplots(figsize=(6, 4))
+fig, ax = plt.subplots(figsize=(7.5, 7.5))
  
 with plt.rc_context({'lines.linewidth': 1}):
     sns.pointplot(
@@ -1005,28 +1012,30 @@ df_mouse_perc.head()
 
 
 ```python
-fig, ax = plt.subplots(figsize=(6, 4))
+fig, ax = plt.subplots(figsize=(7.5, 7.5))
 
-handles = [ plt.plot(
-            df_mouse_perc[drug],
-            **DRUGS_CONFIG[drug],
-            **SHARED_CONFIG,
-        )[0] for drug in DRUGS ]
+def plot_suv(ax):
+    handles = [ plt.plot(
+                df_mouse_perc[drug],
+                **DRUGS_CONFIG[drug],
+                **SHARED_CONFIG,
+            )[0] for drug in DRUGS ]
 
-ax.legend(
-    handles=handles
-)
+    ax.legend(
+        handles=handles
+    )
 
-# Set Y Axial format to percentage
-ax.get_yaxis().set_major_formatter(plt.FuncFormatter(lambda x, loc: "{:.0f}%".format(int(x))))
+    # Set Y Axial format to percentage
+    ax.get_yaxis().set_major_formatter(plt.FuncFormatter(lambda x, loc: "{:.0f}%".format(int(x))))
 
-plt.xlim((0, 50))
-plt.ylim((0, 100))
-plt.grid(True, linestyle='--')
-plt.xlabel('Time(Days)')
-plt.ylabel('Survival Rate (%)')
-plt.title('Survival During Treatement')
-plt.axis()
+    plt.xlim((0, 50))
+    plt.ylim((0, 100))
+    plt.grid(True, linestyle='--')
+    plt.xlabel('Time(Days)')
+    plt.ylabel('Survival Rate (%)')
+    plt.title('Survival During Treatement')
+    
+plot_suv(ax)
 plt.show()
 ```
 
@@ -1038,7 +1047,7 @@ plt.show()
 
 
 ```python
-fig, ax = plt.subplots(figsize=(6, 4))
+fig, ax = plt.subplots(figsize=(7.5, 7.5))
 
 df_mouse_perc.reset_index().plot.line(
     x='Timepoint',
@@ -1107,42 +1116,63 @@ I've tried using plot method of Series but could not get enough control over on 
 
 
 ```python
-fig, ax = plt.subplots(figsize=(6, 4))
+fig, ax = plt.subplots(figsize=(8, 6))
 
 # Note, passing x a list of strings in bar() need latest version of matplotlib.
 # For older version, use integer index and set drug names in xticks().
-bars = ax.bar(
-    DRUGS,
-    tumor_change_perc,
-    align='edge',
-    width=0.99,
-    edgecolor='k',
-    color=['g' if x < 0 else 'r' for x in tumor_change_perc],
-    linewidth=1,
-    alpha=0.5,
-    label=None,   
-)
+def plot_change(ax):
+    bars = ax.bar(
+        DRUGS,
+        tumor_change_perc,
+        align='edge',
+        width=1,
+        edgecolor='k',
+        color=['g' if x < 0 else 'r' for x in tumor_change_perc],
+        linewidth=1,
+        alpha=0.5,
+        label=None,   
+    )
 
-plt.xlim(0,4)
-plt.title('Tumor Change Over 45 Day Treatment')
-plt.grid(True, linestyle='--')
-plt.ylabel('% Tumer Volume Change')
-plt.xticks(np.arange(0.5, len(DRUGS)), rotation=0)
+    plt.xlim(0,4)
+    plt.title('Tumor Change Over 45 Day Treatment')
+    plt.grid(True, linestyle='--')
+    plt.ylabel('% Tumer Volume Change')
+    plt.xticks(np.arange(0.5, len(DRUGS)), rotation=0)
 
-# Set Y axis to percentile
-ax.get_yaxis().set_major_formatter(
-    plt.FuncFormatter(lambda x, loc: "{:.1f}%".format(int(x))))
+    # Set Y axis to percentile
+    ax.get_yaxis().set_major_formatter(
+        plt.FuncFormatter(lambda x, loc: "{:.1f}%".format(int(x))))
 
-# Add labels
-for bar in bars:
-    height = bar.get_height()
-    ax.text(bar.get_x() + 0.25, 
-            -6 if height < 0 else 3, 
-            '{:.1f}%'.format(height))
+    # Add labels
+    for bar in bars:
+        height = bar.get_height()
+        ax.text(bar.get_x() + 0.35, 
+                -6 if height < 0 else 3, 
+                '{:.1f}%'.format(height))
     
+plot_change(ax)
 plt.show()
 ```
 
 
 ![png](output_44_0.png)
+
+
+## All Charts in One Figure
+
+
+```python
+fig = plt.figure(figsize=(15, 10))
+fig.suptitle('Drug Effects on Tumor Size, Metastics and Survival Rates Over Time',
+            fontsize=20)
+plot_vol(plt.subplot(2,2,1))
+plot_met(plt.subplot(2,2,2))
+plot_suv(plt.subplot(2,2,3))
+plot_change(plt.subplot(2,2,4))
+
+plt.show()
+```
+
+
+![png](output_46_0.png)
 

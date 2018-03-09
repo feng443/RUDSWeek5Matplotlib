@@ -42,17 +42,17 @@ df_city.head()
 
 
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
     }
 
     .dataframe tbody tr th {
         vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
     }
 </style>
 <table border="1" class="dataframe">
@@ -112,17 +112,17 @@ df_ride.head()
 
 
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
     }
 
     .dataframe tbody tr th {
         vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
     }
 </style>
 <table border="1" class="dataframe">
@@ -204,17 +204,17 @@ df_city_stat.head()
 
 
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
     }
 
     .dataframe tbody tr th {
         vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
     }
 </style>
 <table border="1" class="dataframe">
@@ -284,31 +284,33 @@ __Note__: When plotting the size is multiplied by 10 to show more apparent diffe
 fig, ax = plt.subplots(figsize=(10, 8))
 
 # Multiply side by 10 to see differences easier
-legend = ax.legend(
-    handles=[
-        ax.scatter(
-            s=df_city_stat.query('type==@type')['driver_count'] * 10,
-            x=df_city_stat.query('type==@type')['ride_count'],
-            y=df_city_stat.query('type==@type')['fare_average'],
-            alpha=0.7,
-            label=type,
-            edgecolor='black',
-            color=COLOR_MAP[type],
-        ) for type in TYPES 
-    ],
-    title='City Types',
-    loc='best',
-)
-for h in legend.legendHandles: h._sizes = [100]
+def plot_bubble(ax):
+    legend = ax.legend(
+        handles=[
+            ax.scatter(
+                s=df_city_stat.query('type==@type')['driver_count'] * 10,
+                x=df_city_stat.query('type==@type')['ride_count'],
+                y=df_city_stat.query('type==@type')['fare_average'],
+                alpha=0.7,
+                label=type,
+                edgecolor='black',
+                color=COLOR_MAP[type],
+            ) for type in TYPES 
+        ],
+        title='City Types',
+        loc='best',
+    )
+    for h in legend.legendHandles: h._sizes = [100]
 
-ax.text(37, 40, 'Note:\nSize of dot represent total driver count per city.',
-         fontsize=12,
-         bbox=dict(facecolor='cornsilk'))
+    ax.text(12,48, 'Note:\nSize of dot represent total driver count per city.',
+             fontsize=12,
+             bbox=dict(facecolor='cornsilk'))
 
-plt.title('Pyber Ride Sharing Data (2016)')
-plt.xlabel('Total Number of Rides (Per City)')
-plt.ylabel('Average Fare ($)')
+    plt.title('Pyber Ride Sharing Data (2016)')
+    plt.xlabel('Total Number of Rides (Per City)')
+    plt.ylabel('Average Fare ($)')
 
+plot_bubble(ax)
 plt.show()
 ```
 
@@ -333,17 +335,17 @@ df_fare_total.head()
 
 
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
     }
 
     .dataframe tbody tr th {
         vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
     }
 </style>
 <table border="1" class="dataframe">
@@ -403,17 +405,17 @@ df_fare_total.head()
 
 
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
     }
 
     .dataframe tbody tr th {
         vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
     }
 </style>
 <table border="1" class="dataframe">
@@ -472,17 +474,17 @@ df_city_stat.head()
 
 
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
     }
 
     .dataframe tbody tr th {
         vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
     }
 </style>
 <table border="1" class="dataframe">
@@ -565,25 +567,68 @@ PIE_STYLE = {
     'wedgeprops': {'linewidth': 1, 'edgecolor': 'grey'}
 }
 
-fig, ax = plt.subplots(3, 1, figsize=(15, 5))
-plt.suptitle("Total fare, ride and drivers by city type")
-
 # Reindex with TYPES to ensure colors and orders match
-plt.subplot(131)
-plt.title('% of Total Fares by City Type')
-plt.pie(df_city_stat.groupby('type')['fare_total'].sum()[TYPES], **PIE_STYLE)
 
-plt.subplot(132)
-plt.title('% of Total Rides by City Type')
-plt.pie(df_city_stat.groupby('type')['ride_count'].sum()[TYPES], **PIE_STYLE)
+def plot_fare(ax):
+    plt.title('% of Total Fares by City Type')
+    ax.pie(df_city_stat.groupby('type')['fare_total'].sum()[TYPES], **PIE_STYLE)
+    plt.axis('equal')
 
-plt.subplot(133)
-plt.title('% of Total Drivers by City Type')
-plt.pie(df_city_stat.groupby('type')['driver_count'].sum()[TYPES], **PIE_STYLE)
+def plot_ride(ax):
+    plt.title('% of Total Rides by City Type')
+    ax.pie(df_city_stat.groupby('type')['ride_count'].sum()[TYPES], **PIE_STYLE)
+    plt.axis('equal')
+
+def plot_driver(ax):
+    plt.title('% of Total Drivers by City Type')
+    ax.pie(df_city_stat.groupby('type')['driver_count'].sum()[TYPES], **PIE_STYLE)
+    plt.axis('equal')
+```
+
+
+```python
+plot_fare(plt.subplot())
+plt.show()
+```
+
+
+![png](output_19_0.png)
+
+
+
+```python
+plot_ride(plt.subplot())
+plt.show()
+```
+
+
+![png](output_20_0.png)
+
+
+
+```python
+plot_driver(plt.subplot())
+plt.show()
+```
+
+
+![png](output_21_0.png)
+
+
+## All in One Figure
+
+
+```python
+fig = plt.figure(figsize=(20,16))
+
+plot_bubble(plt.subplot2grid( (3, 3), (0, 0), rowspan=3, colspan=2))
+plot_fare(plt.subplot2grid((3, 3), (0, 2)))
+plot_ride(plt.subplot2grid((3, 3), (1, 2)))
+plot_driver(plt.subplot2grid((3, 3), (2, 2)))
 
 plt.show()
 ```
 
 
-![png](output_18_0.png)
+![png](output_23_0.png)
 
