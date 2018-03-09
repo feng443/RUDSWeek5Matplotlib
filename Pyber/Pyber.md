@@ -1,7 +1,7 @@
 
 ## Analysis
-1. Urban area has largest number of rides
-2. Urban area has biggest number of drivers
+1. Urban area has the largest number of rides
+2. Urban area has the largest number of drivers
 3. Rurual area has fewest number of rides but higest average fares
 
 ## Imports and Constants
@@ -29,6 +29,7 @@ TYPES = [t for t in COLOR_MAP]
 ```
 
 ## Prepare Data
+Instead of merging at ride level, created stat (summary) level data to hold higher level information, then as necessary computer details status using ride data and append as new columns to the stat (summary) DataFrame. This method can avoid the 'hacky' way of mean(driver count), and also comsume less memory in case the data size is large.
 
 
 ```python
@@ -181,7 +182,7 @@ Before merging ride data into city, summarize it first to avoid double couning o
 
 
 ```python
-df_city = df_city.merge(
+df_city_stat = df_city.merge(
     df_ride.groupby('city')[['fare', 'ride_id']].agg(
         {
             'fare': 'mean',
@@ -194,9 +195,9 @@ df_city = df_city.merge(
         }
     ),
     on='city',
-    how='left'
+    how='outer'
 )
-df_city.head()
+df_city_stat.head()
 ```
 
 
@@ -283,24 +284,22 @@ __Note__: When plotting the size is multiplied by 10 to show more apparent diffe
 fig, ax = plt.subplots(figsize=(10, 8))
 
 # Multiply side by 10 to see differences easier
-handles = [
-    ax.scatter(
-        s=df_city[df_city['type'] == type]['driver_count'] * 10,
-        x=df_city[df_city['type'] == type]['ride_count'],
-        y=df_city[df_city['type'] == type]['fare_average'],
-        alpha=0.7,
-        label=type,
-        edgecolor='black',
-        color=COLOR_MAP[type],
-    ) for type in df_city['type'].unique()
-]
-
-ax.legend(
-    handles=handles,
+legend = ax.legend(
+    handles=[
+        ax.scatter(
+            s=df_city_stat.query('type==@type')['driver_count'] * 10,
+            x=df_city_stat.query('type==@type')['ride_count'],
+            y=df_city_stat.query('type==@type')['fare_average'],
+            alpha=0.7,
+            label=type,
+            edgecolor='black',
+            color=COLOR_MAP[type],
+        ) for type in TYPES 
+    ],
     title='City Types',
     loc='best',
-
 )
+for h in legend.legendHandles: h._sizes = [100]
 
 ax.text(37, 40, 'Note:\nSize of dot represent total driver count per city.',
          fontsize=12,
@@ -320,21 +319,153 @@ plt.show()
 ## Total Fares by City Type
 
 ### Compute Total Fares for Each City
-This data set can be used on all below three pie charts. Note here that total fare is retreived from ride data, instead of computed by fare average multiply by ride count to preserer precision.
+This data set can be used on all below three pie charts. Note here that total fare is retreived from ride data, instead of computed by fare average multiply by ride count to preserve original precision.
 
 
 ```python
-df_city = df_city.merge(
-    df_ride.groupby('city')['fare'].sum(
+df_fare_total = df_ride.pivot_table(values='fare', index='city', aggfunc='sum').rename(
+    columns={'fare': 'fare_total'}
+).reset_index()
+df_fare_total.head()
+```
+
+
+
+
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>city</th>
+      <th>fare_total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Alvarezhaven</td>
+      <td>741.79</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Alyssaberg</td>
+      <td>535.85</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Anitamouth</td>
+      <td>335.84</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Antoniomouth</td>
+      <td>519.75</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Aprilchester</td>
+      <td>417.65</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+### Same result with group by then sum()
+
+
+```python
+df_fare_total = df_ride.groupby('city')['fare'].sum(
     ).to_frame().reset_index().rename(
         columns={
              'fare': 'fare_total',
         }
-    ),
+    )
+df_fare_total.head()
+```
+
+
+
+
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>city</th>
+      <th>fare_total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Alvarezhaven</td>
+      <td>741.79</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Alyssaberg</td>
+      <td>535.85</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Anitamouth</td>
+      <td>335.84</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Antoniomouth</td>
+      <td>519.75</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Aprilchester</td>
+      <td>417.65</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+Reached same result using either groupby and sum() or pivot_table()
+
+
+```python
+df_city_stat = df_city_stat.merge(
+    df_fare_total,
     on='city',
-    how='left'
+    how='outer'
 )
-df_city.head()
+df_city_stat.head()
 ```
 
 
@@ -437,30 +568,22 @@ PIE_STYLE = {
 fig, ax = plt.subplots(3, 1, figsize=(15, 5))
 plt.suptitle("Total fare, ride and drivers by city type")
 
+# Reindex with TYPES to ensure colors and orders match
 plt.subplot(131)
 plt.title('% of Total Fares by City Type')
-plt.pie(
-    df_city.groupby('type')['fare_total'].sum()[TYPES], 
-    **PIE_STYLE
-)
+plt.pie(df_city_stat.groupby('type')['fare_total'].sum()[TYPES], **PIE_STYLE)
 
 plt.subplot(132)
 plt.title('% of Total Rides by City Type')
-plt.pie(
-    df_city.groupby('type')['ride_count'].sum()[TYPES],
-    **PIE_STYLE
-)
+plt.pie(df_city_stat.groupby('type')['ride_count'].sum()[TYPES], **PIE_STYLE)
 
 plt.subplot(133)
 plt.title('% of Total Drivers by City Type')
-plt.pie(
-    df_city.groupby('type')['driver_count'].sum()[TYPES], 
-    **PIE_STYLE
-)
+plt.pie(df_city_stat.groupby('type')['driver_count'].sum()[TYPES], **PIE_STYLE)
 
 plt.show()
 ```
 
 
-![png](output_14_0.png)
+![png](output_18_0.png)
 

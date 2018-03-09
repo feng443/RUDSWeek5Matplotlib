@@ -1,9 +1,9 @@
 
 ## Aanlysis
 
-1. Only one drug, Capomulin, amoung the four in the chart had positive effect on reduce the tumor size, and better survival rate among four. Others does not show significant difference from the placebo.
-2. Metastatic Spread has a significant large standard error. More analysis is needed to proof the hypothesis for any drug is better on this aspect than others.
-3. Standard error for all parameters grow with time
+1. Only one drug, Capomulin, amoung the four in the chart had positive effect on reduce the tumor size, and better survival rate, others does not show significant difference from the placebo.
+2. Metastatic spread has a significant errors, especially for later time points. More analysis such as student T could be applied to approve if the difference between Capomulin is significant different from others.
+3. For all drugs and all parameters, the error of means grow with time.
 
 ## Imports and Constants
 
@@ -34,7 +34,7 @@ DRUGS_CONFIG = OrderedDict( [
     ]
 )
 DRUGS = [x for x in DRUGS_CONFIG]
-
+Z = 1.96 # 0.95 confidence level
 ```
 
 ## Prepare Data
@@ -53,17 +53,17 @@ df_clinical_trial.head()
 
 
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
     }
 
     .dataframe tbody tr th {
         vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
     }
 </style>
 <table border="1" class="dataframe">
@@ -130,17 +130,17 @@ df_mouse_drug.head()
 
 
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
     }
 
     .dataframe tbody tr th {
         vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
     }
 </style>
 <table border="1" class="dataframe">
@@ -198,17 +198,17 @@ df_combo.head()
 
 
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
     }
 
     .dataframe tbody tr th {
         vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
     }
 </style>
 <table border="1" class="dataframe">
@@ -287,17 +287,17 @@ df_tumor_mean.head()
 
 
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
     }
 
     .dataframe tbody tr th {
         vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
     }
 </style>
 <table border="1" class="dataframe">
@@ -359,7 +359,7 @@ df_tumor_mean.head()
 
 
 
-### Compute Standard Error
+### Compute Errors of Means
 
 
 ```python
@@ -377,17 +377,17 @@ df_tumor_sem.head()
 
 
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
     }
 
     .dataframe tbody tr th {
         vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
     }
 </style>
 <table border="1" class="dataframe">
@@ -459,16 +459,16 @@ for drug in DRUGS:
     ax.errorbar(
        x=df_tumor_sem.index,
        y=df_tumor_mean[drug],
-       yerr=df_tumor_sem[drug] * 1.96,
+       yerr=df_tumor_sem[drug] * Z,
        capsize=5,
        capthick=1,
        **DRUGS_CONFIG[drug],
-       **SHARED_CONFIG
+       **SHARED_CONFIG,
        )
 
 ax.legend(loc='best')
 
-plt.xlim((0,45))
+plt.xlim((0,50))
 plt.ylim((20, 80))
 plt.grid(True, linestyle='--')
 plt.xlabel('Time(Days)')
@@ -487,14 +487,14 @@ The limit of this approach is that marker argument does not take a list, even th
 
 ```python
 df_tumor_mean.plot(
-    yerr=df_tumor_sem[drug] * 1.96,
+    yerr=df_tumor_sem[drug] * Z,
     capsize=4,
     capthick=1,
     marker='o',
     color=COLORS,
     **SHARED_CONFIG,
     label='legend',
-    xlim=(0, 45),
+    xlim=(0, 50),
     ylim=(20, 80),
     figsize=(6,4),
     title='Tumer Response to Treatement',
@@ -514,12 +514,11 @@ plt.show()
 ### Plot with Seaborn pointplot
 Searborn's point_point() method take detail level data direclty and draw error bar automatically. Also it is highly configurable. However, I cannot figure out from the document and Googling, the way to set alpha for the line. There is an un-answered stack overflow post: https://stackoverflow.com/questions/33486613/seaborn-pointplot-aesthetics?rq=1
 
-OK, found a work around to set line width but still no vaid on alpha: https://github.com/mwaskom/seaborn/issues/1058
+Found a work around to set line width but still no vaid on alpha: https://github.com/mwaskom/seaborn/issues/1058
 
 
 ```python
 fig, ax = plt.subplots(1,1, figsize=(6, 4))
-
  
 with plt.rc_context({'lines.linewidth': 1}):
     sns.pointplot(
@@ -535,6 +534,9 @@ with plt.rc_context({'lines.linewidth': 1}):
         alpha=0.5,
    
 );
+    
+plt.xlim(0, 10) # 50 Does not work, seems there is a conversion ratio?
+plt.ylim(20, 80)
 ax.legend(title='')
 ax.grid(True, linestyle='--')
 ax.set_title('Tumer Response to Treatement')
@@ -566,17 +568,17 @@ df_metastatic_mean.head()
 
 
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
     }
 
     .dataframe tbody tr th {
         vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
     }
 </style>
 <table border="1" class="dataframe">
@@ -656,17 +658,17 @@ df_metastatic_sem.head()
 
 
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
     }
 
     .dataframe tbody tr th {
         vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
     }
 </style>
 <table border="1" class="dataframe">
@@ -738,7 +740,7 @@ for drug in DRUGS:
     plt.errorbar(
        x=df_metastatic_sem.index,
        y=df_metastatic_mean[drug],
-       yerr=df_metastatic_sem[drug] * 1.96,
+       yerr=df_metastatic_sem[drug] * Z,
        capsize=4,
        capthick=1,
        **DRUGS_CONFIG[drug],
@@ -747,7 +749,7 @@ for drug in DRUGS:
 
 ax.legend(loc='best')
 
-plt.xlim((0, 45))
+plt.xlim((0, 50))
 plt.ylim((-0.5, 5))
 plt.grid(True, linestyle='--')
 plt.xlabel('Time(Days)')
@@ -761,26 +763,25 @@ plt.show()
 
 
 ### Plot with DataFrame.plot
-Looks like when plotting with DataFrame the error bar size is different from the size using Pyplot. This is kind of strange. Not sure it is a bug or there is some control factor not been set correctly.
 
 
 ```python
 fig, ax = plt.subplots(figsize=(6, 4))
 
 df_metastatic_mean.plot(
-    yerr=df_metastatic_sem[drug],
+    yerr=df_metastatic_sem[drug] * Z,
     capsize=5,
     capthick=1,
     marker='o',
     color=COLORS,
     **SHARED_CONFIG,
-    xlim=(0, 45),
+    xlim=(0, 50),
     ylim=(-0.5, 5),
     title='Metastatic Spreading During Treatment',
     ax=ax,
 )
 
-plt.legend(title='')
+ax.legend(title='')
 plt.grid(True, linestyle='--')
 plt.xlabel('Time(Days)')
 plt.ylabel('Met. Sites')
@@ -807,9 +808,11 @@ with plt.rc_context({'lines.linewidth': 1}):
         markers=[DRUGS_CONFIG[drug]['marker'] for drug in DRUGS],
         linestyles=['--' for _ in DRUGS],
         ax=ax,
-        capsize=0.1, 
+        capsize=0.1,
     );
 
+plt.xlim((0, 10))
+plt.ylim((-0.5, 5))
 ax.legend(title='')
 ax.grid(True, linestyle='--')
 ax.set_title('Metastatic Spreading During Treatment')
@@ -841,17 +844,17 @@ df_mouse_count.head()
 
 
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
     }
 
     .dataframe tbody tr th {
         vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
     }
 </style>
 <table border="1" class="dataframe">
@@ -926,17 +929,17 @@ df_mouse_perc.head()
 
 
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
     }
 
     .dataframe tbody tr th {
         vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
     }
 </style>
 <table border="1" class="dataframe">
@@ -959,38 +962,38 @@ df_mouse_perc.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>100.0</td>
-      <td>100.0</td>
-      <td>100.0</td>
-      <td>100.0</td>
+      <td>100</td>
+      <td>100</td>
+      <td>100</td>
+      <td>100</td>
     </tr>
     <tr>
       <th>5</th>
-      <td>100.0</td>
-      <td>100.0</td>
-      <td>92.0</td>
-      <td>96.0</td>
+      <td>100</td>
+      <td>100</td>
+      <td>92</td>
+      <td>96</td>
     </tr>
     <tr>
       <th>10</th>
-      <td>100.0</td>
-      <td>84.0</td>
-      <td>88.0</td>
-      <td>96.0</td>
+      <td>100</td>
+      <td>84</td>
+      <td>88</td>
+      <td>96</td>
     </tr>
     <tr>
       <th>15</th>
-      <td>96.0</td>
-      <td>84.0</td>
-      <td>76.0</td>
-      <td>80.0</td>
+      <td>96</td>
+      <td>84</td>
+      <td>76</td>
+      <td>80</td>
     </tr>
     <tr>
       <th>20</th>
-      <td>92.0</td>
-      <td>80.0</td>
-      <td>76.0</td>
-      <td>76.0</td>
+      <td>92</td>
+      <td>80</td>
+      <td>76</td>
+      <td>76</td>
     </tr>
   </tbody>
 </table>
@@ -1017,7 +1020,7 @@ ax.legend(
 # Set Y Axial format to percentage
 ax.get_yaxis().set_major_formatter(plt.FuncFormatter(lambda x, loc: "{:.0f}%".format(int(x))))
 
-plt.xlim((0, 45))
+plt.xlim((0, 50))
 plt.ylim((0, 100))
 plt.grid(True, linestyle='--')
 plt.xlabel('Time(Days)')
@@ -1039,7 +1042,6 @@ fig, ax = plt.subplots(figsize=(6, 4))
 
 df_mouse_perc.reset_index().plot.line(
     x='Timepoint',
-    y=DRUGS,
     marker='o',
     color=COLORS,
     **SHARED_CONFIG,
@@ -1047,12 +1049,15 @@ df_mouse_perc.reset_index().plot.line(
     ax=ax,
 )
 
+ax.legend(title='')
+plt.xlim((0, 50))
+plt.ylim((0, 100))
 # Set Y Axial format to percentage
 ax.get_yaxis().set_major_formatter(plt.FuncFormatter(lambda x, loc: "{:.0f}%".format(int(x))))
 plt.title('Survival During Treatement')
 plt.xlabel('Time(Days)')
-plt.grid(True, linestyle='--')
 plt.ylabel('Survival Rate (%)')
+plt.grid(True, linestyle='--')
 plt.show()
 ```
 
@@ -1068,20 +1073,32 @@ plt.show()
 ```python
 tumor_first = df_tumor_mean.iloc[0]
 tumor_last = df_tumor_mean.iloc[-1]
-tumor_change_perc = 100 * (tumor_last - tumor_first) / tumor_first
-
-tumor_change_perc
+tumor_last
 ```
 
 
 
 
     Drug
-    Capomulin   -19.475303
-    Infubinol    46.123472
-    Ketapril     57.028795
-    Placebo      51.297960
-    dtype: float64
+    Capomulin    36.236114
+    Infubinol    65.755562
+    Ketapril     70.662958
+    Placebo      68.084082
+    Name: 45, dtype: float64
+
+
+
+
+```python
+tumor_change_perc = 100 * (tumor_last - tumor_first) / tumor_first
+
+type(tumor_change_perc['Capomulin'])
+```
+
+
+
+
+    numpy.float64
 
 
 
@@ -1092,7 +1109,9 @@ I've tried using plot method of Series but could not get enough control over on 
 ```python
 fig, ax = plt.subplots(figsize=(6, 4))
 
-ax.bar(
+# Note, passing x a list of strings in bar() need latest version of matplotlib.
+# For older version, use integer index and set drug names in xticks().
+bars = ax.bar(
     DRUGS,
     tumor_change_perc,
     align='edge',
@@ -1102,7 +1121,7 @@ ax.bar(
     linewidth=1,
     alpha=0.5,
     label=None,   
-)[0].axes
+)
 
 plt.xlim(0,4)
 plt.title('Tumor Change Over 45 Day Treatment')
@@ -1110,20 +1129,20 @@ plt.grid(True, linestyle='--')
 plt.ylabel('% Tumer Volume Change')
 plt.xticks(np.arange(0.5, len(DRUGS)), rotation=0)
 
-# Set Y Axial format to percentage
-ax.get_yaxis().set_major_formatter(plt.FuncFormatter(lambda x, loc: "{:.0f}%".format(int(x))))
+# Set Y axis to percentile
+ax.get_yaxis().set_major_formatter(
+    plt.FuncFormatter(lambda x, loc: "{:.1f}%".format(int(x))))
 
 # Add labels
-for i in range(len(tumor_change_perc)):
-    perc = tumor_change_perc[i]
-    if perc > 0:
-        ax.text(i + 0.25, 3, '{:.2f}%'.format(perc))
-    else:
-        ax.text(i + 0.25, -5, '{:.2f}%'.format(perc))
-        
+for bar in bars:
+    height = bar.get_height()
+    ax.text(bar.get_x() + 0.25, 
+            -6 if height < 0 else 3, 
+            '{:.1f}%'.format(height))
+    
 plt.show()
 ```
 
 
-![png](output_43_0.png)
+![png](output_44_0.png)
 
